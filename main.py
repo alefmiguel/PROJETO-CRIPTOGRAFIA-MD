@@ -10,7 +10,7 @@ def gerar_chaves():
         mensagem = entry_mensagem.get()
 
         # Chama o executável C e passa os parâmetros
-        process = subprocess.Popen(['./criptografia'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen(['criptografia.exe'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         
         # Envia os dados para o programa C
         input_data = f"gerar\n{p}\n{q}\n{e}\n{mensagem}\n"
@@ -31,7 +31,7 @@ def descriptografar():
         valores_criptografados = entry_criptografados.get()
 
         # Chama o executável C para descriptografar
-        process = subprocess.Popen(['./criptografia'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        process = subprocess.Popen(['criptografia.exe'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
         # Envia os dados para o programa C
         input_data = f"descriptografar\n{d}\n{n}\n{valores_criptografados}\n"
@@ -40,7 +40,7 @@ def descriptografar():
         if stderr:
             messagebox.showerror("Erro", stderr)
         else:
-            messagebox.showinfo("Mensagem Descriptografada", stdout)
+            messagebox.showinfo("Mensagem Descriptografada", stdout.strip())
 
     except ValueError:
         messagebox.showerror("Erro", "Por favor, insira números válidos.")
