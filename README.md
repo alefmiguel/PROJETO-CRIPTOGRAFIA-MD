@@ -17,3 +17,4 @@
 <h5> Ter uma IDE instalada. </h5>
 <h5> Ter WSL instalado. </h5>
 <h5> Ter GMP instalado no WSL. </h5>
+<h5> Rodar com o comand: ./criptografia < dados.txt </h5>
