@@ -48,6 +48,7 @@ def descriptografar():
 # Criação da interface gráfica
 root = tk.Tk()
 root.title("Criptografia")
+root.geometry("400x400");
 
 # Gerar Chaves
 tk.Label(root, text="Número primo p:").pack()

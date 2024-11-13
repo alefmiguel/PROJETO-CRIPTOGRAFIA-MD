@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <gmp.h>
 
 #define true 1
 #define false 0
 
 // Função para verificar se um número é primo
-int verif_primo(int num) {
+long long int verif_primo( long long int num) {
     if (num < 2 || (num != 2 && num % 2 == 0)) return false;
     for (int i = 2; i <= sqrt(num); i++) {
         if (num % i == 0) return false;
@@ -16,7 +17,7 @@ int verif_primo(int num) {
 }
 
 // Função para calcular o MDC entre dois números
-int mdc(int a, int b) {
+long long int mdc(long long int a, long int b) {
     while (b != 0) {
         int temp = b;
         b = a % b;
@@ -26,12 +27,12 @@ int mdc(int a, int b) {
 }
 
 // Função para calcular o inverso modular
-int inverso_modular(int e, int Z) {
-    int t = 0, t_02 = 1;
-    int r = Z, r_02 = e;
+long long int inverso_modular(long long int e, long long int Z) {
+    long long int t = 0, t_02 = 1;
+    long long int r = Z, r_02 = e;
     while (r_02 != 0) {
-        int q = r / r_02;
-        int temp = t;
+        long long int q = r / r_02;
+        long long int temp = t;
         t = t_02;
         t_02 = temp - q * t_02;
         temp = r;
@@ -43,31 +44,33 @@ int inverso_modular(int e, int Z) {
 }
 
 // Função para cálculo modular rápido
-long long exp_mod(long long base, long long exp, long long mod) {
-    long long result = 1;
-    while (exp > 0) {
-        if (exp % 2 == 1) {
-            result = (result * base) % mod;
+void exp_mod(mpz_t result, mpz_t base, mpz_t exp, mpz_t mod) {
+
+    mpz_t BASE, EXP;
+    mpz_init_set(BASE, base);  
+    mpz_init_set(EXP, exp);    
+
+    mpz_set_ui(result, 1);  
+
+    while (mpz_cmp_ui(EXP, 0) > 0) {
+        if (mpz_odd_p(EXP)) {  
+            mpz_mul(result, result, BASE);
+            mpz_mod(result, result, mod);
         }
-        base = (base * base) % mod;
-        exp /= 2;
+        mpz_mul(BASE, BASE, BASE);
+        mpz_mod(BASE, BASE, mod);
+
+        mpz_fdiv_q_2exp(EXP, EXP, 1);  
     }
-    return result;
+
+    mpz_clear(BASE);
+    mpz_clear(EXP);
 }
 
-// Função para criptografar um caractere
-int criptografar_caractere(int m, int e, int n) {
-    return exp_mod(m, e, n);
-}
-
-// Função para descriptografar um caractere
-int descriptografar_caractere(int c, int d, int n) {
-    return exp_mod(c, d, n);
-}
 
 int main() {
     char comando[20];
-    int p, q, e, d, n;
+    long long int p, q, e, d, n;
     
     // Lê o comando
     if (scanf("%s", comando) != 1) {
@@ -77,7 +80,7 @@ int main() {
 
     if (strcmp(comando, "gerar") == 0) {
         // Leitura dos valores de p, q e e
-        scanf("%d %d %d", &p, &q, &e);
+        scanf("%lld %lld %lld", &p, &q, &e);
 
         // Verificação de primalidade de p e q
         if (!verif_primo(p)) {
@@ -91,7 +94,7 @@ int main() {
 
         // Calcula n e Z
         n = p * q;
-        int Z = (p - 1) * (q - 1);
+        long long int Z = (p - 1) * (q - 1);
 
         // Verifica se e é coprimo com Z
         if (mdc(e, Z) != 1) {
@@ -103,32 +106,69 @@ int main() {
         d = inverso_modular(e, Z);
 
         // Exibe as chaves e outros valores
-        printf("%d %d %d\n", n, e, d);
+        printf("Chave Pública: (%lld, %lld)\n", e, n);
+        printf("Chave Privada: (%lld, %lld)\n", d, n);
 
         // Lê e criptografa a mensagem
         char mensagem[256];
         scanf(" %[^\n]", mensagem);  // Lê a linha inteira para a mensagem
         printf("Mensagem criptografada: ");
+
         for (int i = 0; mensagem[i] != '\0'; i++) {
             int m = (int)mensagem[i];
+           // unsigned long long int C;
+            /// C recebrá valor encriptado;
+           mpz_t gmp_E, gmp_N, gmp_men, gmp_result;
+
+            mpz_init_set_si(gmp_E, e);
+            mpz_init_set_si(gmp_N, n);
+            mpz_init_set_si(gmp_men, m);
+            mpz_init_set_ui(gmp_result, 1);
+
             if (m >= 32 && m <= 126) {
-                int c = criptografar_caractere(m, e, n);
-                printf("%d ", c);
+
+            exp_mod(gmp_result, gmp_men, gmp_E, gmp_N);
+
+            //C = mpz_get_ui(gmp_result);
+
+            gmp_printf("%Zd ", gmp_result);
+
+            mpz_clears(gmp_result, gmp_men, gmp_N, gmp_E, NULL);
+            
             }
         }
         printf("\n");
 
     } else if (strcmp(comando, "descriptografar") == 0) {
         // Leitura dos valores de d, n e valores criptografados
-        scanf("%d %d", &d, &n);
+       
+        mpz_t gmp_d, gmp_n;
 
-        int c;
+       
+        mpz_inits(gmp_d, gmp_n, NULL);
+       
+        gmp_scanf("%Zd %Zd", gmp_d, gmp_n);
+
+        
+        long long int c;
         printf("Mensagem descriptografada: ");
-        while (scanf("%d", &c) == 1) {
-            int m = descriptografar_caractere(c, d, n);
-            if (m >= 32 && m <= 126) {
-                printf("%c", (char)m);
-            }
+
+
+        while (scanf("%lld", &c) == 1) {
+            mpz_t gmp_c, gmp_result;
+
+            mpz_init_set_si(gmp_c, c);
+            mpz_init_set_ui(gmp_result, 1);
+
+            exp_mod(gmp_result, gmp_c, gmp_d,gmp_n);
+
+            int men = mpz_get_ui(gmp_result);
+           
+            char MEN = men;
+
+            if (men >= 32 && men <= 126) {
+                printf("%c", (char)MEN);
+               }
         }
         printf("\n");
     }
