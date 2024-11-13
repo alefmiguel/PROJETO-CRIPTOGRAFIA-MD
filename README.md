@@ -12,3 +12,8 @@
 
 <h3> LINK PARA SLIDE DO PROJETO </h3>
 <h4> https://docs.google.com/presentation/d/1g9pYzEV_SgC7ot9dTX4IusD29uehwA5Tfe-zMzgfg2I/edit?usp=sharing </h4>
+
+<h3> PASSO A PASSO PARA USAR </h3>
+<h5> Ter WSL instalado. </h5>
+<h5> Ter GCC instalado no WSL. </h5>
+<h5> Ter uma IDE instalada. </h5>
